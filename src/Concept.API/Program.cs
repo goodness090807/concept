@@ -3,6 +3,7 @@ using Concept.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Shared;
 using Shared.Interfaces;
+using Shared.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddOptions<EmailServiceSetting>()
+    .Bind(builder.Configuration.GetSection(EmailServiceSetting.SectionName));
+
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddCoreServices();
 
 var app = builder.Build();
