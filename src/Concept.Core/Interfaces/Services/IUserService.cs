@@ -5,13 +5,13 @@ namespace Concept.Core.Interfaces.Services
     public interface IUserService : IBaseService
     {
         /// <summary>
-        /// 註冊使用者
+        /// 使用者註冊
         /// </summary>
-        Task<Result<int>> RegisterUserAsync(string email, string password, string confirmPassword);
+        Task<Result<int>> RegisterAsync(string email, string username, string password, string confirmPassword);
 
         /// <summary>
-        /// 新增使用者
+        /// 使用者登入
         /// </summary>
-        Task<Result<int>> AddUserAsync(string username, string email, string password, string confirmPassword);
+        Task<Result<string>> LoginAsync(string email, string password);
     }
 }

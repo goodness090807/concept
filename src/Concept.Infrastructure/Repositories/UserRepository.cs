@@ -1,4 +1,5 @@
 using Concept.Core.Entities.User;
+using Concept.Core.Entities.User.Enums;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,17 @@ namespace Concept.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<int> AddUserAsync(string username, string email, string hashedPassword)
+        public async Task<int> AddUserAsync(string username, string email, string hashedPassword, UserStatus userStatus)
         {
             var user = new UserEntity
             {
-                UserName = username,
                 Email = email,
-                HashedPassword = hashedPassword
+                UserName = username,
+                HashedPassword = hashedPassword,
+                UserStatus = userStatus,
             };
 
             await _context.Users.AddAsync(user);
-
             await _context.SaveChangesAsync();
 
             return user.Id;

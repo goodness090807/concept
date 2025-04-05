@@ -1,6 +1,6 @@
-﻿namespace Shared.Settings
+﻿namespace Shared.Configs
 {
-    public class EmailServiceSetting
+    public class EmailServiceConfig
     {
         public const string SectionName = "EmailService";
 

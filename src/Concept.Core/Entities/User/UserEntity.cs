@@ -27,6 +27,6 @@ namespace Concept.Core.Entities.User
         /// <summary>
         /// 使用者狀態
         /// </summary>
-        public UserStatus? UserStatus { get; set; }
+        public UserStatus UserStatus { get; set; }
     }
 }

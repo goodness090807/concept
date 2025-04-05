@@ -1,27 +1,74 @@
 using Concept.API.Extensions;
+using Concept.Core.Interfaces;
+using Concept.Core.Interfaces.Repositories;
+using Concept.Core.Interfaces.Services;
+using Concept.Core.Services.User;
+using Concept.Infrastructure;
 using Concept.Infrastructure.Data;
+using Concept.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Shared;
 using Shared.Interfaces;
-using Shared.Settings;
+using Shared.Configs;
+using Concept.Core.Services.Store;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddOptions<EmailServiceSetting>()
-    .Bind(builder.Configuration.GetSection(EmailServiceSetting.SectionName));
+builder.Services.AddOptions<EmailServiceConfig>()
+    .Bind(builder.Configuration.GetSection(EmailServiceConfig.SectionName));
 
+builder.Services.AddOptions<TokenServiceConfig>()
+    .Bind(builder.Configuration.GetSection(TokenServiceConfig.SectionName));
+
+// TODO：Optimize 應實現自動註冊
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration.GetSection("TokenService:Issuer").Value,
+            ValidAudience = builder.Configuration.GetSection("TokenService:Audience").Value,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("TokenService:SecretKey").Value!)),
+        };
+    }
+);
+
 builder.Services.AddCoreServices();
 
 var app = builder.Build();
@@ -32,8 +79,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseCors();
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
