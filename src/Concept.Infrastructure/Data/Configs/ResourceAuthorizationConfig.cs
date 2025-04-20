@@ -14,7 +14,7 @@ namespace Concept.Infrastructure.Data.Configs
             builder.Property(x => x.AuthorizedUserId).IsRequired();
             builder.Property(x => x.GrantedByUserId).IsRequired();
             builder.Property(x => x.ExpiresAt).HasColumnType("timestamp");
-            builder.Property(x => x.PermissionLevel).HasConversion<string>().HasMaxLength(20).IsRequired();
+            builder.Property(x => x.PermissionLevel).HasConversion<int>().IsRequired();
             builder.Property(x => x.IsActive).IsRequired();
 
             // 設定關聯

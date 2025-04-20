@@ -27,7 +27,7 @@ namespace Concept.API.Controllers.User
 
             if (result.IsFailure)
             {
-                return result.Error switch
+                return result.ErrorCode switch
                 {
                     UserErrorCodes.EmailAlreadyExists => Conflict("Email已存在"),
                     UserErrorCodes.PasswordAndConfirmPasswordNotMatch => BadRequest("密碼與確認密碼不相同"),
@@ -38,13 +38,16 @@ namespace Concept.API.Controllers.User
             return Ok(result.Data);
         }
 
+        /// <summary>
+        /// 使用者登入
+        /// </summary>
         [HttpPost("login")]
         public async Task<IActionResult> LoginUserAsync([FromBody] LoginRequest req)
         {
             var result = await _userService.LoginAsync(req.Email, req.Password);
             if (result.IsFailure)
             {
-                return result.Error switch
+                return result.ErrorCode switch
                 {
                     UserErrorCodes.UserNotFound => NotFound("使用者不存在"),
                     UserErrorCodes.InvalidPassword => BadRequest("密碼錯誤"),

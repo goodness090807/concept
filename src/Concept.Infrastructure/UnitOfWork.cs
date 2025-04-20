@@ -69,5 +69,13 @@ namespace Concept.Infrastructure
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+            if (_context != null)
+            {
+                await _context.DisposeAsync();
+            }
+        }
     }
 }

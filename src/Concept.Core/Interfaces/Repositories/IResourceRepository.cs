@@ -21,9 +21,19 @@ namespace Concept.Core.Interfaces.Repositories
         /// <param name="userId"></param>
         /// <param name="grantedByUserId"></param>
         /// <param name="permissionLevel"></param>
-        /// <param name="grantedAt"></param>
         /// <param name="expiresAt"></param>
         /// <returns></returns>
-        Task<int> GrantResourceAccessAsync(int resourceId, int userId, int grantedByUserId, ResourcePermissionLevel permissionLevel, DateTime grantedAt, DateTime? expiresAt);
+        Task<int> GrantResourceAccessAsync(int resourceId, int userId, int grantedByUserId, ResourcePermissionLevel permissionLevel, DateTime? expiresAt);
+
+        /// <summary>
+        /// 取得資源權限
+        /// </summary>
+        /// <param name="resourceType"></param>
+        /// <param name="resourceKey"></param>
+        /// <param name="userId"></param>
+        /// <param name="permissionLevel"></param>
+        /// <param name="checkInactiveResources"></param>
+        /// <returns></returns>
+        Task<bool> GetPermissionAsync(string resourceType, string resourceKey, int userId, ResourcePermissionLevel permissionLevel, bool checkInactiveResources = false);
     }
 }

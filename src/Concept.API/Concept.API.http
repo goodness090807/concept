@@ -1,10 +1,11 @@
 @API_HostAddress = https://localhost:8081
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE2IiwiZXhwIjoxNzQzODQ3NzUwLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo4MDgxIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6ODA4MSJ9.tGAH3RZKCOMAyomT07fX19V_7USSbDZEQUtiLlCWDQc
+@token = 123
 
+# 使用者註冊
 POST {{API_HostAddress}}/api/users/register
 Content-Type: application/json
 {
-  "Username": "���ըϥΪ�",
+  "Username": "測試使用者",
   "Email": "test@gmail.com",
   "Password": "aA@12345678",
   "ConfirmPassword": "aA@12345678"
@@ -12,6 +13,7 @@ Content-Type: application/json
 
 ###
 
+# 使用者登入
 POST {{API_HostAddress}}/api/users/login
 Content-Type: application/json
 {
@@ -21,9 +23,17 @@ Content-Type: application/json
 
 ###
 
+# 更新商店名稱
 POST {{API_HostAddress}}/api/stores
 Content-Type: application/json
 Authorization: Bearer {{token}}
 {
-  "Name": "���հө�"
+  "Name": "測試商店"
 }
+
+###
+
+# 取得指定商店的詳細資訊
+GET {{API_HostAddress}}/api/stores/17
+Content-Type: application/json
+Authorization: Bearer {{token}}

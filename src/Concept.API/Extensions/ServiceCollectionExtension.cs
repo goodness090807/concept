@@ -14,21 +14,26 @@ namespace Concept.API.Extensions
         /// </summary>
         public static IServiceCollection AddCoreServices(this IServiceCollection services)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var baseServices = assembly.GetTypes()
-                .Where(type => typeof(IBaseService).IsAssignableFrom(type))
-                .Where(type => type != typeof(IBaseService))
-                .Where(type => type.IsInterface);
+            // 取得所有已載入的組件
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            foreach (Type baseService in baseServices)
+            foreach (var assembly in assemblies)
             {
-                var implementType = Array.Find(assembly.GetTypes(), type => baseService.IsAssignableFrom(type) && !type.IsInterface);
-                if (implementType == null)
-                {
-                    throw new NotImplementedException($"找不到{baseService.Name}的實作");
-                }
+                var baseServices = assembly.GetTypes()
+                    .Where(type => typeof(IBaseService).IsAssignableFrom(type))
+                    .Where(type => type != typeof(IBaseService))
+                    .Where(type => type.IsInterface);
 
-                services.AddScoped(baseService, implementType);
+                foreach (Type baseService in baseServices)
+                {
+                    var implementType = Array.Find(assembly.GetTypes(), type => baseService.IsAssignableFrom(type) && !type.IsInterface);
+                    if (implementType == null)
+                    {
+                        throw new NotImplementedException($"找不到 {baseService.Name} 的實作");
+                    }
+
+                    services.AddScoped(baseService, implementType);
+                }
             }
 
             return services;

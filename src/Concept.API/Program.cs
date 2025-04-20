@@ -1,18 +1,17 @@
 using Concept.API.Extensions;
+using Concept.API.Authorization;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
-using Concept.Core.Interfaces.Services;
-using Concept.Core.Services.User;
 using Concept.Infrastructure;
 using Concept.Infrastructure.Data;
 using Concept.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Shared;
-using Shared.Interfaces;
-using Shared.Configs;
-using Concept.Core.Services.Store;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shared;
+using Shared.Configs;
+using Shared.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,16 +30,17 @@ builder.Services.AddOptions<EmailServiceConfig>()
 builder.Services.AddOptions<TokenServiceConfig>()
     .Bind(builder.Configuration.GetSection(TokenServiceConfig.SectionName));
 
-// TODO°GOptimize ¿≥πÍ≤{¶€∞ µ˘•U
+// TODOÔºöOptimize ÊáâÂØ¶ÁèæËá™ÂãïË®ªÂÜä
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthorizationHandler, ResourceAccessHandler>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, ResourceAccessPolicyProvider>();
 
 builder.Services.AddCors(options =>
 {
