@@ -1,4 +1,4 @@
-﻿using Concept.API.Attributes;
+﻿using Concept.API.Authorizations.ResourceAccess;
 using Concept.API.Controllers.Store.Requests;
 using Concept.API.Extensions;
 using Concept.Core.Entities.ResourceAuthorization.Enums;

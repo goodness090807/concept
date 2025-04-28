@@ -2,7 +2,7 @@ using Concept.API.Extensions;
 using Concept.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Concept.API.Authorization
+namespace Concept.API.Authorizations.ResourceAccess
 {
     public class ResourceAccessHandler : AuthorizationHandler<ResourceAccessRequirement>
     {

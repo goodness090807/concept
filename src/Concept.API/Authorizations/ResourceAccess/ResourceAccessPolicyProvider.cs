@@ -1,7 +1,7 @@
 ﻿using Concept.Core.Entities.ResourceAuthorization.Enums;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Concept.API.Authorization
+namespace Concept.API.Authorizations.ResourceAccess
 {
     public class ResourceAccessPolicyProvider : IAuthorizationPolicyProvider
     {

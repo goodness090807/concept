@@ -1,5 +1,4 @@
 using Concept.Core.Interfaces;
-using System.Reflection;
 
 namespace Concept.API.Extensions
 {

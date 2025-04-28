@@ -1,5 +1,5 @@
+using Concept.API.Authorizations.ResourceAccess;
 using Concept.API.Extensions;
-using Concept.API.Authorization;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Infrastructure;

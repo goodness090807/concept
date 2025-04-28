@@ -1,7 +1,7 @@
 ﻿using Concept.Core.Entities.ResourceAuthorization.Enums;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Concept.API.Attributes
+namespace Concept.API.Authorizations.ResourceAccess
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class ResourceAccessAttribute : AuthorizeAttribute
