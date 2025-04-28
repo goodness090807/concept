@@ -16,7 +16,5 @@ namespace Concept.Core.Entities.Resource
         public int OwnerId { get; set; }
 
         public UserEntity Owner { get; set; } = null!;
-
-        public ICollection<ResourceAuthorizationEntity> Authorizations { get; set; } = new List<ResourceAuthorizationEntity>();
     }
 }
