@@ -1,0 +1,34 @@
+name: Deploy to Cloud Run
+
+on:
+    workflow_run:
+        workflows: ["Publish Docker image"]
+        types:
+            - completed
+
+jobs:
+    deploy:
+        name: Deploy to Cloud Run
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+        steps:
+            - name: Authenticate to Google Cloud
+              id: auth
+              uses: google-github-actions/auth@v1
+              with:
+                  credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+            - name: Set up Cloud SDK
+              uses: google-github-actions/setup-gcloud@v1
+
+            # TODO: tag應該改為使用自動取得，每一次build都會有不同的tag
+            - name: Deploy to Cloud Run
+              run: |-
+                  gcloud run deploy concept-api \
+                    --image goodness090807/conceptapi:latest \
+                    --platform managed \
+                    --region us-central1 \
+                    --allow-unauthenticated \
+                    --set-env-vars=TokenService__SecretKey="${{ secrets.TokenService__SecretKey }},TokenService__Issuer=${{ secrets.TokenService__Issuer }},TokenService__Audience=${{ secrets.TokenService__Audience }},ConnectionStrings__DefaultConnection=${{ secrets.ConnectionStrings__DefaultConnection }}" \
+                    --project ${{ secrets.GCP_PROJECT_ID }}
