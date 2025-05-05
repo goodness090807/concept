@@ -2,7 +2,7 @@ name: Deploy to Cloud Run
 
 on:
     workflow_run:
-        workflows: ["Publish Docker image"]
+        workflows: ["CI/CD Pipeline"]
         types:
             - completed
 
@@ -10,9 +10,22 @@ jobs:
     deploy:
         name: Deploy to Cloud Run
         runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        # 只有當CI成功完成，並且標籤名稱以"v"開頭時才執行
+        if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_ref, 'refs/tags/v') }}
 
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+
+            - name: Extract tag name
+              id: extract-tag
+              run: |
+                  TAGNAME=${GITHUB_REF#refs/tags/}
+                  echo "TAG=${TAGNAME}" >> $GITHUB_OUTPUT
+                  echo "Extracted tag: $TAGNAME"
+
             - name: Authenticate to Google Cloud
               id: auth
               uses: google-github-actions/auth@v1
@@ -22,11 +35,10 @@ jobs:
             - name: Set up Cloud SDK
               uses: google-github-actions/setup-gcloud@v1
 
-            # TODO: tag應該改為使用自動取得，每一次build都會有不同的tag
             - name: Deploy to Cloud Run
               run: |-
                   gcloud run deploy concept-api \
-                    --image goodness090807/conceptapi:latest \
+                    --image goodness090807/conceptapi:${{ steps.extract-tag.outputs.TAG || 'latest' }} \
                     --platform managed \
                     --region us-central1 \
                     --allow-unauthenticated \

@@ -1,12 +1,19 @@
-name: Publish Docker image
+name: CI/CD Pipeline
 
 on:
     push:
+        branches:
+            - main
+            - develop
+        tags:
+            - "v*.*.*" # 觸發標籤格式，ex.v1.0.0
 
 jobs:
     push_to_registry:
         name: Push Docker image to Docker Hub
         runs-on: ubuntu-latest
+        # 只有在推送標籤時才執行
+        if: startsWith(github.ref, 'refs/tags/')
         permissions:
             packages: write
             contents: read
@@ -22,13 +29,13 @@ jobs:
                   username: ${{ secrets.DOCKER_USERNAME }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
-            # TODO: tag應該改為使用自動取得，每一次build都會有不同的tag
             - name: Extract metadata (tags, labels) for Docker
               id: meta
               uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
               with:
                   images: goodness090807/conceptapi
                   tags: |
+                      type=semver,pattern={{version}}
                       type=sha,format=short
                       latest
 
