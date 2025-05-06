@@ -71,6 +71,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddCoreServices();
 
+// 添加健康檢查服務
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -86,5 +89,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// 映射健康檢查端點 (放在app.UseAuthorization()之後或app.MapControllers()附近)
+app.MapHealthChecks("/health");
 
 await app.RunAsync();
