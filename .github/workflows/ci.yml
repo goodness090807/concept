@@ -1,50 +1,88 @@
-name: Publish Docker image
+name: CI Pipeline
 
 on:
     push:
+        # 當branch為main或tag為v*.*.*時觸發
+        branches: ["main"]
+        tags: ["v*.*.*"]
+    pull_request:
+        branches: ["main"]
+
+env:
+    # 使用github的ghcr.io作為docker registry
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+    DOCKERFILE: ./src/Concept.API/Dockerfile
+    DOTNET_VERSION: "9.0.x" # 根據您的專案使用的.NET版本
 
 jobs:
-    push_to_registry:
-        name: Push Docker image to Docker Hub
+    build:
         runs-on: ubuntu-latest
         permissions:
-            packages: write
             contents: read
-            attestations: write
+            packages: write
             id-token: write
+
         steps:
-            - name: Check out the repo
+            - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: Log in to Docker Hub
-              uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-              with:
-                  username: ${{ secrets.DOCKER_USERNAME }}
-                  password: ${{ secrets.DOCKER_PASSWORD }}
+            # TODO： 增加單元測試的階段
+            # 添加.NET SDK安裝
+            # - name: Setup .NET
+            #   uses: actions/setup-dotnet@v3
+            #   with:
+            #       dotnet-version: ${{ env.DOTNET_VERSION }}
 
-            # TODO: tag應該改為使用自動取得，每一次build都會有不同的tag
-            - name: Extract metadata (tags, labels) for Docker
-              id: meta
-              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+            # # 在Docker構建前進行應用構建測試
+            # - name: Build .NET solution
+            #   run: dotnet build src/Concept.API/Concept.API.csproj --configuration Release
+
+            # # 運行單元測試
+            # - name: Run unit tests
+            #   run: dotnet test tests/Concept.API.Tests/Concept.API.Tests.csproj --configuration Release --no-build
+
+            - name: Install cosign
+              if: github.event_name != 'pull_request'
+              uses: sigstore/cosign-installer@v3.5.0
               with:
-                  images: goodness090807/conceptapi
-                  tags: |
-                      type=sha,format=short
-                      latest
+                  cosign-release: "v2.2.4"
+
+            - name: Set up QEMU
+              uses: docker/setup-qemu-action@v3
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log into registry ${{ env.REGISTRY }}
+              if: github.event_name != 'pull_request'
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
             - name: Build and push Docker image
-              id: push
-              uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+              id: build-and-push
+              uses: docker/build-push-action@v6
               with:
                   context: .
-                  file: ./src/Concept.API/Dockerfile
-                  push: true
+                  file: ${{ env.DOCKERFILE }}
+                  push: ${{ github.event_name != 'pull_request' }}
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-            - name: Generate artifact attestation
-              uses: actions/attest-build-provenance@v2
-              with:
-                  subject-name: index.docker.io/goodness090807/conceptapi
-                  subject-digest: ${{ steps.push.outputs.digest }}
-                  push-to-registry: true
+            - name: Sign the published Docker image
+              if: ${{ github.event_name != 'pull_request' }}
+              env:
+                  TAGS: ${{ steps.meta.outputs.tags }}
+                  DIGEST: ${{ steps.build-and-push.outputs.digest }}
+              run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

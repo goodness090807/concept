@@ -2,7 +2,7 @@ name: Deploy to Cloud Run
 
 on:
     workflow_run:
-        workflows: ["Publish Docker image"]
+        workflows: ["CI Pipeline"]
         types:
             - completed
 
@@ -13,20 +13,51 @@ jobs:
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+                  fetch-depth: 0 # 抓取完整的git歷史，包含標籤
+
+            - name: Check if triggered by tag
+              id: check-tag
+              run: |
+                  # 獲取觸發 workflow_run 的 ref
+                  git fetch --all --tags
+                  REF=${{ github.event.workflow_run.head_sha }}
+
+                  # 查看是否有標籤指向這個 commit
+                  TAG=$(git tag --points-at $REF)
+
+                  if [[ -n "$TAG" ]]; then
+                    echo "Found tag: $TAG"
+                    echo "IS_TAG=true" >> $GITHUB_OUTPUT
+                    # 移除 'v' 前綴
+                    VERSION=${TAG#v}
+                    echo "TAG_VERSION=$VERSION" >> $GITHUB_OUTPUT
+                  else
+                    echo "No tag found for this commit, skipping deployment"
+                    echo "IS_TAG=false" >> $GITHUB_OUTPUT
+                  fi
+
+            # 只有當觸發來源是標籤時才執行部署
             - name: Authenticate to Google Cloud
               id: auth
+              if: steps.check-tag.outputs.IS_TAG == 'true'
               uses: google-github-actions/auth@v1
               with:
                   credentials_json: ${{ secrets.GCP_SA_KEY }}
 
             - name: Set up Cloud SDK
+              if: steps.check-tag.outputs.IS_TAG == 'true'
               uses: google-github-actions/setup-gcloud@v1
 
-            # TODO: tag應該改為使用自動取得，每一次build都會有不同的tag
             - name: Deploy to Cloud Run
-              run: |-
+              if: steps.check-tag.outputs.IS_TAG == 'true'
+              run: |
+                  echo "Deploying version: ${{ steps.check-tag.outputs.TAG_VERSION || 'latest' }}"
                   gcloud run deploy concept-api \
-                    --image goodness090807/conceptapi:latest \
+                    --image goodness090807/conceptapi:${{ steps.check-tag.outputs.TAG_VERSION || 'latest' }} \
                     --platform managed \
                     --region us-central1 \
                     --allow-unauthenticated \
