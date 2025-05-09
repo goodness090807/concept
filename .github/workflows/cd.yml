@@ -1,65 +1,31 @@
 name: Deploy to Cloud Run
 
 on:
-    workflow_run:
-        workflows: ["CI Pipeline"]
-        types:
-            - completed
+    push:
+        branches: [main]
 
 jobs:
     deploy:
-        name: Deploy to Cloud Run
+        permissions:
+            contents: "read"
+            id-token: "write"
         runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
         steps:
-            - name: Checkout repository
+            - name: Checkout
               uses: actions/checkout@v4
-              with:
-                  ref: ${{ github.event.workflow_run.head_sha }}
-                  fetch-depth: 0 # 抓取完整的git歷史，包含標籤
 
-            - name: Check if triggered by tag
-              id: check-tag
-              run: |
-                  # 獲取觸發 workflow_run 的 ref
-                  git fetch --all --tags
-                  REF=${{ github.event.workflow_run.head_sha }}
-
-                  # 查看是否有標籤指向這個 commit
-                  TAG=$(git tag --points-at $REF)
-
-                  if [[ -n "$TAG" ]]; then
-                    echo "Found tag: $TAG"
-                    echo "IS_TAG=true" >> $GITHUB_OUTPUT
-                    # 移除 'v' 前綴
-                    VERSION=${TAG#v}
-                    echo "TAG_VERSION=$VERSION" >> $GITHUB_OUTPUT
-                  else
-                    echo "No tag found for this commit, skipping deployment"
-                    echo "IS_TAG=false" >> $GITHUB_OUTPUT
-                  fi
-
-            # 只有當觸發來源是標籤時才執行部署
-            - name: Authenticate to Google Cloud
+            - name: Google Auth
               id: auth
-              if: steps.check-tag.outputs.IS_TAG == 'true'
-              uses: google-github-actions/auth@v1
+              uses: "google-github-actions/auth@v2"
               with:
-                  credentials_json: ${{ secrets.GCP_SA_KEY }}
+                  workload_identity_provider: "${{ secrets.WIF_PROVIDER }}"
+                  service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}"
 
-            - name: Set up Cloud SDK
-              if: steps.check-tag.outputs.IS_TAG == 'true'
-              uses: google-github-actions/setup-gcloud@v1
+            - id: "deploy"
+              uses: "google-github-actions/deploy-cloudrun@v2"
+              with:
+                  service: "concept"
+                  image: "ghcr.io/goodness090807/concept"
 
-            - name: Deploy to Cloud Run
-              if: steps.check-tag.outputs.IS_TAG == 'true'
-              run: |
-                  echo "Deploying version: ${{ steps.check-tag.outputs.TAG_VERSION || 'latest' }}"
-                  gcloud run deploy concept-api \
-                    --image goodness090807/conceptapi:${{ steps.check-tag.outputs.TAG_VERSION || 'latest' }} \
-                    --platform managed \
-                    --region us-central1 \
-                    --allow-unauthenticated \
-                    --set-env-vars=TokenService__SecretKey="${{ secrets.TokenService__SecretKey }},TokenService__Issuer=${{ secrets.TokenService__Issuer }},TokenService__Audience=${{ secrets.TokenService__Audience }},ConnectionStrings__DefaultConnection=${{ secrets.ConnectionStrings__DefaultConnection }}" \
-                    --project ${{ secrets.GCP_PROJECT_ID }}
+            - name: "Use output"
+              run: 'curl "${{ steps.deploy.outputs.url }}"'
