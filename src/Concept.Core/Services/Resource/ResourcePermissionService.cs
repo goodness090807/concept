@@ -16,7 +16,7 @@ namespace Concept.Core.Services.Resource
 
         public Task<bool> HasPermissionAsync(string resourceType, string resourceKey, int userId, ResourcePermissionLevel resourcePermissionLevel, bool checkInactiveResources = false)
         {
-            // Optimization: ½T»{¬O§_»İ­n¨Ï¥ÎResult Pattern
+            // Optimization: ç¢ºèªæ˜¯å¦éœ€è¦ä½¿ç”¨Result Pattern
             var resourcePermissionRepository = _unitOfWork.GetRepository<IResourceRepository>();
             return resourcePermissionRepository.GetPermissionAsync(resourceType, resourceKey, userId, resourcePermissionLevel, checkInactiveResources);
         }
