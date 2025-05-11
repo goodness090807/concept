@@ -44,12 +44,12 @@ namespace Concept.Infrastructure.Data
                 {
                     if (entry.State == EntityState.Added)
                     {
-                        entity.CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
-                        entity.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                        entity.CreatedAt = DateTime.UtcNow;
+                        entity.UpdatedAt = DateTime.UtcNow;
                     }
                     else if (entry.State == EntityState.Modified)
                     {
-                        entity.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                        entity.UpdatedAt = DateTime.UtcNow;
                     }
                 }
 

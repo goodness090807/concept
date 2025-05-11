@@ -30,7 +30,7 @@ namespace Concept.Core.Entities.ResourceAuthorization
         /// <summary>
         /// 可設定權限過期時間
         /// </summary>
-        public DateTime? ExpiresAt { get; set; }
+        public DateTimeOffset? ExpiresAt { get; set; }
 
         /// <summary>
         /// 授權的具體權限

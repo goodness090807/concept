@@ -2,7 +2,7 @@ namespace Concept.Core.Entities
 {
     public abstract class TimestampedEntity : ITimestampedEntity
     {
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }

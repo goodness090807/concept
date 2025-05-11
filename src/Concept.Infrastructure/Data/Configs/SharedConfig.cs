@@ -8,8 +8,8 @@ namespace Concept.Infrastructure.Data.Configs
     {
         public static void ConfigureAuditableEntity<T>(this EntityTypeBuilder<T> builder) where T : AuditableEntity
         {
-            builder.Property(x => x.CreatedAt).HasColumnType("timestamp").IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnType("timestamp").IsRequired();
+            builder.Property(x => x.CreatedAt).HasColumnType("timestamptz").IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnType("timestamptz").IsRequired();
         }
     }
 }
