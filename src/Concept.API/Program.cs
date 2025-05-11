@@ -1,5 +1,6 @@
 using Concept.API.Authorizations.ResourceAccess;
 using Concept.API.Extensions;
+using Concept.API.Middlewares;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Infrastructure;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Shared;
 using Shared.Configs;
 using Shared.Interfaces;
@@ -16,9 +18,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.AddSerilogConfigure();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -101,6 +106,8 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -118,4 +125,13 @@ app.MapControllers();
 // 映射健康檢查端點 (放在app.UseAuthorization()之後或app.MapControllers()附近)
 app.MapHealthChecks("/health");
 
+
+// 記錄應用程式啟動訊息
+Log.Information("Starting up {Application} in {Environment} environment",
+    builder.Environment.ApplicationName, builder.Environment.EnvironmentName);
+
 await app.RunAsync();
+
+// 應用程式關閉紀錄
+Log.Information("Shutting down {Application}", builder.Environment.ApplicationName);
+await Log.CloseAndFlushAsync();
