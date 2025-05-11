@@ -36,14 +36,14 @@ namespace Shared
                 issuer: _tokenConfig.Issuer,
                 audience: _tokenConfig.Audience,
                 claims: mergedClaims,
-                expires: DateTimeOffset.UtcNow.DateTime.AddMinutes(tokenExpirationMinutes > 0 ? tokenExpirationMinutes : _tokenConfig.TokenExpirationMinutes),
+                expires: DateTime.UtcNow.AddMinutes(tokenExpirationMinutes > 0 ? tokenExpirationMinutes : _tokenConfig.TokenExpirationMinutes),
                 signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string GenerateRefreshToken()
+        public static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
@@ -65,6 +65,7 @@ namespace Shared
                 ValidateAudience = true,
                 ValidAudience = _tokenConfig.Audience,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero // 這個設置可以避免 Token 時區問題導致的提前過期
             };
             return tokenHandler.ValidateToken(token, validationParameters, out _);
         }

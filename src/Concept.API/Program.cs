@@ -65,6 +65,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration.GetSection("TokenService:Issuer").Value,
             ValidAudience = builder.Configuration.GetSection("TokenService:Audience").Value,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("TokenService:SecretKey").Value!)),
+            ClockSkew = TimeSpan.Zero // 這個設置可以避免 Token 時區問題導致的提前過期
+        };
+        
+        // 添加事件處理程序，以便能夠記錄驗證過程中的錯誤
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"驗證失敗: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token 驗證成功");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Console.WriteLine($"權限挑戰: {context.Error}, {context.ErrorDescription}");
+                return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                return Task.CompletedTask;
+            }
         };
     }
 );
