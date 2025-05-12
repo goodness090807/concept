@@ -1,9 +1,12 @@
 using Concept.Core.Common;
+using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.User.Enums;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Core.Interfaces.Services;
+using Concept.Core.Services.User.ViewModels;
 using Shared.Interfaces;
+using System.Security.Claims;
 
 namespace Concept.Core.Services.User
 {
@@ -62,10 +65,35 @@ namespace Concept.Core.Services.User
             }
 
             // 取得token
-            var token = _tokenService.GenerateJwtToken(user.Id.ToString(), new List<System.Security.Claims.Claim>());
+            var token = _tokenService.GenerateJwtToken(user.Id.ToString(), new List<Claim>());
 
             // 提交並回傳(只有一個資料庫操作，所以不需要 transaction和提交)
             return Result<string>.Success(token);
+        }
+        
+        public async Task<Result<UserStoresViewModel>> GetStoresAsync(int userId)
+        {
+            if (userId <= 0)
+            {
+                return Result<UserStoresViewModel>.Failure(UserErrorCodes.UserNotFound, "無效的使用者ID");
+            }
+
+            // 會用到的資料庫資源
+            var resourceRepository = _unitOfWork.GetRepository<IResourceRepository>();
+            
+            // 取得使用者的所有商店權限
+            var storePermissions = await resourceRepository.GetUserResourcePermissionsAsync(ResourceTypes.Store, userId);
+            
+            var userStores = storePermissions.Select(sp => 
+                new UserStoreViewModel(
+                    id: int.Parse(sp.ResourceKey),  // ResourceKey 是 StoreId 的字串表示
+                    name: sp.ResourceName,
+                    permissionLevel: sp.PermissionLevel,
+                    isOwner: sp.OwnerId == userId
+                )
+            ).ToList();
+
+            return Result<UserStoresViewModel>.Success(new UserStoresViewModel(userStores));
         }
     }
 }

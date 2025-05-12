@@ -23,17 +23,38 @@ Content-Type: application/json
 
 ###
 
-# 更新商店名稱
+# 新增商店
+
 POST {{API_HostAddress}}/api/stores
 Content-Type: application/json
 Authorization: Bearer {{token}}
 {
-  "Name": "測試商店"
+  "Name": "使用者測試商店2"
 }
 
 ###
 
-# 取得指定商店的詳細資訊
-GET {{API_HostAddress}}/api/stores/17
+# 取得使用者的商店清單
+
+GET {{API_HostAddress}}/api/users/stores
 Content-Type: application/json
 Authorization: Bearer {{token}}
+
+###
+
+# 取得指定商店的詳細資訊
+GET {{API_HostAddress}}/api/stores/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# 給予商店權限
+
+POST {{API_HostAddress}}/api/stores/1/permissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+{
+  "UserId": 2,
+  "PermissionLevel": 1
+}

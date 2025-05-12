@@ -40,8 +40,8 @@ namespace Concept.Infrastructure.Repositories
                 AuthorizedUserId = userId,
                 GrantedByUserId = grantedByUserId,
                 PermissionLevel = permissionLevel,
-                // TODO：認為可以再加個開始授權的時間，被授權者可以選擇要從什麼時候開始授權
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
+                IsActive = true
             };
 
             await _context.ResourceAuthorizations.AddAsync(resourceAccess);
@@ -64,6 +64,40 @@ namespace Concept.Infrastructure.Repositories
                 x.Resource.ResourceKey == resourceKey &&
                 x.AuthorizedUserId == userId &&
                 x.PermissionLevel >= permissionLevel);
+        }
+
+        public async Task<List<(int ResourceId, string ResourceKey, string ResourceName, int OwnerId, DateTimeOffset? ExpiresAt, ResourcePermissionLevel PermissionLevel)>> GetUserResourcePermissionsAsync(string resourceType, int userId, bool includeExpired = false)
+        {
+            var query = _context.ResourceAuthorizations.AsNoTracking()
+                .Where(x => x.AuthorizedUserId == userId &&
+                       x.Resource.ResourceType == resourceType &&
+                       x.IsActive
+                );
+
+            if (!includeExpired)
+            {
+                query = query.Where(x => x.ExpiresAt == null || x.ExpiresAt > DateTime.UtcNow);
+            }
+
+            var results = await query.Select(x => new
+            {
+                ResourceId = x.Resource.Id,
+                ResourceKey = x.Resource.ResourceKey,
+                ResourceName = x.Resource.Name,
+                OwnerId = x.Resource.OwnerId,
+                ExpiresAt = x.ExpiresAt,
+                PermissionLevel = x.PermissionLevel
+            })
+            .ToListAsync();
+
+            return results.Select(r => (
+                r.ResourceId,
+                r.ResourceKey,
+                r.ResourceName,
+                r.OwnerId,
+                r.ExpiresAt,
+                r.PermissionLevel
+            )).ToList();
         }
     }
 }

@@ -8,5 +8,7 @@ namespace Concept.Core.Interfaces.Repositories
         Task<int> AddUserAsync(string username, string email, string hashedPassword, UserStatus userStatus);
 
         Task<UserEntity?> GetUserByEmailAsync(string email);
+
+        Task<UserEntity?> GetUserByIdAsync(int userId);
     }
 }

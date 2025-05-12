@@ -35,5 +35,14 @@ namespace Concept.Core.Interfaces.Repositories
         /// <param name="checkInactiveResources"></param>
         /// <returns></returns>
         Task<bool> GetPermissionAsync(string resourceType, string resourceKey, int userId, ResourcePermissionLevel permissionLevel, bool checkInactiveResources = false);
+
+        /// <summary>
+        /// 取得使用者對指定類型資源的所有權限
+        /// </summary>
+        /// <param name="resourceType">資源類型</param>
+        /// <param name="userId">使用者ID</param>
+        /// <returns>資源權限清單</returns>
+        Task<List<(int ResourceId, string ResourceKey, string ResourceName, int OwnerId, DateTimeOffset? ExpiresAt, ResourcePermissionLevel PermissionLevel)>> 
+            GetUserResourcePermissionsAsync(string resourceType, int userId, bool includeExpired = false);
     }
 }

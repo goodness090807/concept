@@ -1,6 +1,8 @@
 using Concept.API.Controllers.User.Requests;
+using Concept.API.Extensions;
 using Concept.Core.Interfaces.Services;
 using Concept.Core.Services.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Concept.API.Controllers.User
@@ -52,6 +54,25 @@ namespace Concept.API.Controllers.User
                     UserErrorCodes.UserNotFound => NotFound("使用者不存在"),
                     UserErrorCodes.InvalidPassword => BadRequest("密碼錯誤"),
                     _ => BadRequest("登入失敗")
+                };
+            }
+            return Ok(result.Data);
+        }
+        
+        /// <summary>
+        /// 取得使用者可以存取的商店
+        /// </summary>
+        /// <returns>使用者可存取的商店列表，區分為自己建立的和被分享的商店</returns>
+        [HttpGet("stores"), Authorize]
+        public async Task<IActionResult> GetStoresAsync()
+        {
+            var result = await _userService.GetStoresAsync(User.GetUserId());
+            if (result.IsFailure)
+            {
+                return result.ErrorCode switch
+                {
+                    UserErrorCodes.UserNotFound => Unauthorized("無法獲取使用者資訊"),
+                    _ => BadRequest("取得商店失敗")
                 };
             }
             return Ok(result.Data);
