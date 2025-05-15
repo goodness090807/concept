@@ -1,5 +1,4 @@
-@API_HostAddress = https://localhost:8081
-@token = 123
+@API_HostAddress = https://localhost:5001
 
 # 使用者註冊
 POST {{API_HostAddress}}/api/users/register
@@ -14,12 +13,23 @@ Content-Type: application/json
 ###
 
 # 使用者登入
+# @name login
 POST {{API_HostAddress}}/api/users/login
 Content-Type: application/json
 {
   "Email": "test@gmail.com",
   "Password": "aA@12345678"
 }
+
+###
+
+@token = {{login.response.body.*}}
+
+# 取得使用者的商店清單
+
+GET {{API_HostAddress}}/api/users/stores
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
 ###
 
@@ -34,17 +44,9 @@ Authorization: Bearer {{token}}
 
 ###
 
-# 取得使用者的商店清單
-
-GET {{API_HostAddress}}/api/users/stores
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-###
 
 # 取得指定商店的詳細資訊
 GET {{API_HostAddress}}/api/stores/1
-Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
