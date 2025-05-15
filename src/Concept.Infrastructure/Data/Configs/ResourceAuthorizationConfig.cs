@@ -45,7 +45,7 @@ namespace Concept.Infrastructure.Data.Configs
             // 用於查找和清理過期權限
             builder.HasIndex(x => x.ExpiresAt).HasFilter("(\"ExpiresAt\") IS NOT NULL");
 
-            builder.ConfigureAuditableEntity();
+            builder.ConfigureTimestampedEntity();
         }
     }
 }

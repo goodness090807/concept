@@ -3,6 +3,7 @@ using System;
 using Concept.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Concept.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515134648_RemoveAuditFieldsFromUserEntity")]
+    partial class RemoveAuditFieldsFromUserEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,7 +71,7 @@ namespace Concept.Infrastructure.Migrations
 
                     b.HasIndex("ResourceType", "ResourceKey");
 
-                    b.ToTable("Resources", (string)null);
+                    b.ToTable("Resources");
                 });
 
             modelBuilder.Entity("Concept.Core.Entities.ResourceAuthorization.ResourceAuthorizationEntity", b =>
@@ -121,7 +124,7 @@ namespace Concept.Infrastructure.Migrations
                     b.HasIndex("ResourceId", "AuthorizedUserId")
                         .IsUnique();
 
-                    b.ToTable("ResourceAuthorizations", (string)null);
+                    b.ToTable("ResourceAuthorizations");
                 });
 
             modelBuilder.Entity("Concept.Core.Entities.Store.StoreEntity", b =>
@@ -161,7 +164,7 @@ namespace Concept.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Stores", (string)null);
+                    b.ToTable("Stores");
                 });
 
             modelBuilder.Entity("Concept.Core.Entities.User.UserEntity", b =>
@@ -202,7 +205,7 @@ namespace Concept.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Concept.Core.Entities.Resource.ResourceEntity", b =>

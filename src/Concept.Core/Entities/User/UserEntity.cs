@@ -2,7 +2,7 @@ using Concept.Core.Entities.User.Enums;
 
 namespace Concept.Core.Entities.User
 {
-    public class UserEntity : AuditableEntity
+    public class UserEntity : TimestampedEntity
     {
         /// <summary>
         /// Id

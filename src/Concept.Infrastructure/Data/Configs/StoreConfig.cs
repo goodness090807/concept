@@ -19,7 +19,7 @@ namespace Concept.Infrastructure.Data.Configs
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
-            builder.ConfigureAuditableEntity();
+            builder.ConfigureTimestampedEntity();
         }
     }
 }

@@ -3,14 +3,20 @@ using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.ResourceAuthorization;
 using Concept.Core.Entities.Store;
 using Concept.Core.Entities.User;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Security.Claims;
 
 namespace Concept.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly IHttpContextAccessor? _httpContextAccessor;
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor? httpContextAccessor = null) : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<UserEntity> Users { get; set; }
@@ -22,40 +28,41 @@ namespace Concept.Infrastructure.Data
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
+
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            UpdateBaseInfo();
+            UpdateEntitiesInfo();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            UpdateBaseInfo();
+            UpdateEntitiesInfo();
             return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
-        private void UpdateBaseInfo()
+        private void UpdateEntitiesInfo()
         {
             var entries = ChangeTracker.Entries();
+            var currentUserId = GetCurrentUserId();
+            var currentTime = DateTime.UtcNow;
 
             foreach (var entry in entries)
             {
-                if (entry.Entity is ITimestampedEntity entity)
+                // 更新時間戳
+                if (entry.Entity is ITimestampedEntity timestampedEntity)
                 {
                     if (entry.State == EntityState.Added)
                     {
-                        entity.CreatedAt = DateTime.UtcNow;
-                        entity.UpdatedAt = DateTime.UtcNow;
+                        timestampedEntity.CreatedAt = currentTime;
+                        timestampedEntity.UpdatedAt = currentTime;
                     }
                     else if (entry.State == EntityState.Modified)
                     {
-                        entity.UpdatedAt = DateTime.UtcNow;
+                        timestampedEntity.UpdatedAt = currentTime;
                     }
                 }
-
-                // TODO�GGet current user id from HttpContext
-                var currentUserId = 0;
-
+                
                 if (entry.Entity is IAuditableEntity auditableEntity)
                 {
                     if (entry.State == EntityState.Added)
@@ -69,6 +76,19 @@ namespace Concept.Infrastructure.Data
                     }
                 }
             }
+        }
+
+        private int? GetCurrentUserId()
+        {
+            if (_httpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated is true)
+            {
+                var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+                {
+                    return userId;
+                }
+            }
+            return null;
         }
     }
 }

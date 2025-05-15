@@ -6,10 +6,12 @@ namespace Concept.Infrastructure.Data.Configs
 {
     public static class SharedConfig
     {
-        public static void ConfigureAuditableEntity<T>(this EntityTypeBuilder<T> builder) where T : AuditableEntity
+        private const string TimestampWithTimeZone = "timestamptz";
+
+        public static void ConfigureTimestampedEntity<T>(this EntityTypeBuilder<T> builder) where T : TimestampedEntity
         {
-            builder.Property(x => x.CreatedAt).HasColumnType("timestamptz").IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnType("timestamptz").IsRequired();
+            builder.Property(x => x.CreatedAt).HasColumnType(TimestampWithTimeZone).IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnType(TimestampWithTimeZone).IsRequired();
         }
     }
 }

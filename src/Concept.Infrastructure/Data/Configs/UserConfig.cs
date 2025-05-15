@@ -18,9 +18,8 @@ namespace Concept.Infrastructure.Data.Configs
                    .HasMaxLength(20)
                    .HasDefaultValue(UserStatus.Inactive)
                    .IsRequired();
-
-            // TODO：可優化寫法，將 AuditableEntity 的設定抽出來，避免沒有設定 AuditableEntity 的屬性
-            builder.ConfigureAuditableEntity();
+            
+            builder.ConfigureTimestampedEntity();
         }
     }
 }
