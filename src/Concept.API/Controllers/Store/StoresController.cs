@@ -57,6 +57,29 @@ namespace Concept.API.Controllers.Store
         }
         
         /// <summary>
+        /// 更新商店資訊
+        /// </summary>
+        [HttpPut("{storeId}"), Authorize]
+        [ResourceAccess("Store", "StoreId", ResourcePermissionLevel.ADMIN)]
+        public async Task<IActionResult> UpdateStoreAsync([FromRoute]int storeId, [FromBody] UpdateStoreRequest req)
+        {
+            var result = await _storeService.UpdateStoreAsync(storeId, req.Name, req.Description);
+            
+            if (result.IsFailure)
+            {
+                return result.ErrorCode switch
+                {
+                    StoreErrorCodes.StoreNotFound => NotFound("商店不存在"),
+                    StoreErrorCodes.InvalidData => BadRequest("商店名稱不能為空"),
+                    StoreErrorCodes.UpdateFailed => BadRequest("更新商店資料失敗"),
+                    _ => BadRequest("更新商店失敗")
+                };
+            }
+            
+            return Ok(result.Data);
+        }
+        
+        /// <summary>
         /// 授予使用者商店權限
         /// </summary>
         /// <param name="storeId">商店ID</param>

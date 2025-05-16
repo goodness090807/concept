@@ -7,5 +7,6 @@ namespace Concept.Core.Interfaces.Repositories
         Task<int> AddStoreAsync(int userId, string name);
         Task<StoreEntity?> GetStoreByIdAsync(int storeId);
         Task<StoreEntity?> GetStoreByUserIdAsync(int userId);
+        Task<bool> UpdateStoreAsync(int storeId, string name, string description);
     }
 }

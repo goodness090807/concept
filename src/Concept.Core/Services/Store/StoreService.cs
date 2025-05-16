@@ -160,5 +160,52 @@ namespace Concept.Core.Services.Store
                 return Result<int>.Failure(StoreErrorCodes.PermissionGrantFailed, $"授予權限失敗: {ex.Message}");
             }
         }
+
+        public async Task<Result<UpdateStoreViewModel>> UpdateStoreAsync(int storeId, string name, string description)
+        {
+            if (storeId <= 0)
+            {
+                return Result<UpdateStoreViewModel>.Failure(StoreErrorCodes.StoreNotFound, "商店ID無效");
+            }
+            
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Result<UpdateStoreViewModel>.Failure(StoreErrorCodes.InvalidData, "商店名稱不能為空");
+            }
+            
+            var storeRepository = _unitOfWork.GetRepository<IStoreRepository>();
+            
+            // 先確認商店是否存在
+            var store = await storeRepository.GetStoreByIdAsync(storeId);
+            if (store == null)
+            {
+                return Result<UpdateStoreViewModel>.Failure(StoreErrorCodes.StoreNotFound, "商店不存在");
+            }
+            
+            // 更新商店資料
+            var success = await storeRepository.UpdateStoreAsync(storeId, name, description);
+            if (!success)
+            {
+                return Result<UpdateStoreViewModel>.Failure(StoreErrorCodes.UpdateFailed, "更新商店資料失敗");
+            }
+            
+            // 同時更新對應的資源名稱
+            var resourceRepository = _unitOfWork.GetRepository<IResourceRepository>();
+            var resources = await resourceRepository.GetResourcesByTypeAndKeyAsync(ResourceTypes.Store, storeId.ToString());
+            
+            if (resources.Any())
+            {
+                var resourceId = resources[0].Id;
+                await resourceRepository.UpdateResourceNameAsync(resourceId, name);
+            }
+            
+            return Result<UpdateStoreViewModel>.Success(
+                new UpdateStoreViewModel(
+                    storeId,
+                    name,
+                    description
+                )
+            );
+        }
     }
 }

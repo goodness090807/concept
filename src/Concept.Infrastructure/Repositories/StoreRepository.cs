@@ -32,5 +32,20 @@ namespace Concept.Infrastructure.Repositories
         {
             return await _context.Stores.Where(x => x.UserId == userId).FirstOrDefaultAsync();
         }
+    
+        public async Task<bool> UpdateStoreAsync(int storeId, string name, string description)
+        {
+            var store = await _context.Stores.FirstOrDefaultAsync(x => x.Id == storeId);
+            if (store == null)
+            {
+                return false;
+            }
+        
+            store.Name = name;
+            store.Description = description;
+        
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

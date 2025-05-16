@@ -99,5 +99,41 @@ namespace Concept.Infrastructure.Repositories
                 r.PermissionLevel
             )).ToList();
         }
+
+        public async Task<List<(int Id, string Name, string ResourceType, string ResourceKey, int OwnerId)>> GetResourcesByTypeAndKeyAsync(string resourceType, string resourceKey)
+        {
+            var resources = await _context.Resources
+                .Where(r => r.ResourceType == resourceType && r.ResourceKey == resourceKey)
+                .Select(r => new
+                {
+                    r.Id,
+                    r.Name,
+                    r.ResourceType,
+                    r.ResourceKey,
+                    r.OwnerId
+                })
+                .ToListAsync();
+
+            return resources.Select(r => (
+                r.Id,
+                r.Name,
+                r.ResourceType,
+                r.ResourceKey,
+                r.OwnerId
+            )).ToList();
+        }
+
+        public async Task<bool> UpdateResourceNameAsync(int resourceId, string name)
+        {
+            var resource = await _context.Resources.FindAsync(resourceId);
+            if (resource == null)
+            {
+                return false;
+            }
+
+            resource.Name = name;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -26,6 +26,22 @@ namespace Concept.Core.Interfaces.Repositories
         Task<int> GrantResourceAccessAsync(int resourceId, int userId, int grantedByUserId, ResourcePermissionLevel permissionLevel, DateTime? expiresAt);
 
         /// <summary>
+        /// 根據類型和鍵值取得資源
+        /// </summary>
+        /// <param name="resourceType">資源類型</param>
+        /// <param name="resourceKey">資源鍵值</param>
+        /// <returns>資源清單</returns>
+        Task<List<(int Id, string Name, string ResourceType, string ResourceKey, int OwnerId)>> GetResourcesByTypeAndKeyAsync(string resourceType, string resourceKey);
+
+        /// <summary>
+        /// 更新資源名稱
+        /// </summary>
+        /// <param name="resourceId">資源ID</param>
+        /// <param name="name">新名稱</param>
+        /// <returns>是否成功</returns>
+        Task<bool> UpdateResourceNameAsync(int resourceId, string name);
+
+        /// <summary>
         /// 取得資源權限
         /// </summary>
         /// <param name="resourceType"></param>
@@ -42,7 +58,7 @@ namespace Concept.Core.Interfaces.Repositories
         /// <param name="resourceType">資源類型</param>
         /// <param name="userId">使用者ID</param>
         /// <returns>資源權限清單</returns>
-        Task<List<(int ResourceId, string ResourceKey, string ResourceName, int OwnerId, DateTimeOffset? ExpiresAt, ResourcePermissionLevel PermissionLevel)>> 
+        Task<List<(int ResourceId, string ResourceKey, string ResourceName, int OwnerId, DateTimeOffset? ExpiresAt, ResourcePermissionLevel PermissionLevel)>>
             GetUserResourcePermissionsAsync(string resourceType, int userId, bool includeExpired = false);
     }
 }

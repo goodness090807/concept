@@ -22,6 +22,15 @@ namespace Concept.Core.Interfaces.Services
         Task<Result<StoreViewModel>> GetStoreByIdAsync(int storeId);
         
         /// <summary>
+        /// 更新商店資訊
+        /// </summary>
+        /// <param name="storeId">商店ID</param>
+        /// <param name="name">商店名稱</param>
+        /// <param name="description">商店描述</param>
+        /// <returns>更新結果</returns>
+        Task<Result<UpdateStoreViewModel>> UpdateStoreAsync(int storeId, string name, string description);
+        
+        /// <summary>
         /// 授予使用者商店權限
         /// </summary>
         /// <param name="storeId">商店ID</param>
