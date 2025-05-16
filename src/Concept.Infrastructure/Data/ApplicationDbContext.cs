@@ -1,4 +1,5 @@
 using Concept.Core.Entities;
+using Concept.Core.Entities.Product;
 using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.ResourceAuthorization;
 using Concept.Core.Entities.Store;
@@ -17,6 +18,7 @@ namespace Concept.Infrastructure.Data
         public DbSet<ResourceEntity> Resources { get; set; }
         public DbSet<ResourceAuthorizationEntity> ResourceAuthorizations { get; set; }
         public DbSet<StoreEntity> Stores { get; set; }
+        public DbSet<ProductEntity> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,7 +55,7 @@ namespace Concept.Infrastructure.Data
                     }
                 }
 
-                // TODO¡GGet current user id from HttpContext
+                // TODOï¿½GGet current user id from HttpContext
                 var currentUserId = 0;
 
                 if (entry.Entity is IAuditableEntity auditableEntity)

@@ -11,6 +11,10 @@
         /// </summary>
         EDITOR = 2,
         /// <summary>
+        /// 商品管理員（只能管理商品，不能管理商店）
+        /// </summary>
+        PRODUCT_MANAGER = 100,
+        /// <summary>
         /// 可管理資源
         /// </summary>
         ADMIN = 500,
