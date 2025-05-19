@@ -59,6 +59,7 @@ namespace Concept.Core.Services.Store
                 )
             );
         }
+        
         public async Task<Result<int>> GrantStorePermissionAsync(int storeId, int grantedByUserId, int userId, ResourcePermissionLevel permissionLevel, DateTime? expiresAt)
         {
             // 驗證參數
@@ -66,27 +67,27 @@ namespace Concept.Core.Services.Store
             {
                 return Result<int>.Failure(StoreErrorCodes.StoreNotFound, "商店ID無效");
             }
-            
+
             if (userId <= 0)
             {
                 return Result<int>.Failure(StoreErrorCodes.InvalidUserId, "被授權使用者ID無效");
             }
-            
+
             if (grantedByUserId <= 0)
             {
                 return Result<int>.Failure(StoreErrorCodes.InvalidGrantedByUserId, "授權者ID無效");
             }
-            
+
             if (userId == grantedByUserId)
             {
                 return Result<int>.Failure(StoreErrorCodes.CannotGrantPermissionToSelf, "不能授予自己權限");
             }
-            
+
             if (permissionLevel == ResourcePermissionLevel.OWNER)
             {
                 return Result<int>.Failure(StoreErrorCodes.CannotGrantOwnerPermission, "不能授予所有者權限");
             }
-            
+
             // 檢查被授權的使用者是否存在
             var userRepository = _unitOfWork.GetRepository<IUserRepository>();
             var authorizedUser = await userRepository.GetUserByIdAsync(userId);
@@ -94,7 +95,7 @@ namespace Concept.Core.Services.Store
             {
                 return Result<int>.Failure(StoreErrorCodes.UserNotFound, "被授權的使用者不存在");
             }
-            
+
             // 1. 檢查商店是否存在
             var storeRepository = _unitOfWork.GetRepository<IStoreRepository>();
             var store = await storeRepository.GetStoreByIdAsync(storeId);
@@ -102,26 +103,26 @@ namespace Concept.Core.Services.Store
             {
                 return Result<int>.Failure(StoreErrorCodes.StoreNotFound, "商店不存在");
             }
-            
+
             var resourceRepository = _unitOfWork.GetRepository<IResourceRepository>();
             // 2. 取得資源ID
             var resourcePermissions = await resourceRepository.GetUserResourcePermissionsAsync(ResourceTypes.Store, grantedByUserId);
             var storeResource = resourcePermissions.FirstOrDefault(r => r.ResourceKey == storeId.ToString());
-            
+
             if (storeResource.ResourceId <= 0)
             {
                 return Result<int>.Failure(StoreErrorCodes.ResourceNotFound, "找不到商店對應的資源");
             }
-            
+
             var userPermissions = await resourceRepository.GetUserResourcePermissionsAsync(ResourceTypes.Store, userId, includeExpired: true);
-            
+
             // 3. 授予權限
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 int authorizationId;
-                
+
                 // 檢查用戶是否已經有權限（避免重複授權）
                 var existingPermission = userPermissions.FirstOrDefault(r => r.ResourceKey == storeId.ToString());
                 if (existingPermission.ResourceId > 0)
@@ -151,7 +152,7 @@ namespace Concept.Core.Services.Store
                         permissionLevel,
                         expiresAt);
                 }
-                
+
                 await transaction.CommitAsync();
                 return Result<int>.Success(authorizationId);
             }

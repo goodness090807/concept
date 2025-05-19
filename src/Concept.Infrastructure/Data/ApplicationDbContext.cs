@@ -1,8 +1,13 @@
 using Concept.Core.Entities;
+using Concept.Core.Entities.Permission;
 using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.ResourceAuthorization;
+using Concept.Core.Entities.Role;
+using Concept.Core.Entities.RolePermission;
 using Concept.Core.Entities.Store;
 using Concept.Core.Entities.User;
+using Concept.Core.Entities.UserPermission;
+using Concept.Core.Entities.UserRoleEntity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -21,7 +26,12 @@ namespace Concept.Infrastructure.Data
 
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<ResourceEntity> Resources { get; set; }
-        public DbSet<ResourceAuthorizationEntity> ResourceAuthorizations { get; set; }
+        public DbSet<ResourceAuthorizationEntity> ResourceAuthorizations { get; set; }        public DbSet<PermissionEntity> Permissions { get; set; }
+        public DbSet<RoleEntity> Roles { get; set; }
+        public DbSet<UserRoleEntity> UserRoles { get; set; }
+        public DbSet<RolePermissionEntity> RolePermissions { get; set; }
+        public DbSet<UserPermissionEntity> UserPermissions { get; set; }
+
         public DbSet<StoreEntity> Stores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

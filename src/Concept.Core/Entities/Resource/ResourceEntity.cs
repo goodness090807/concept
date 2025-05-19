@@ -1,14 +1,15 @@
-﻿using Concept.Core.Entities.ResourceAuthorization;
-using Concept.Core.Entities.User;
+﻿using Concept.Core.Entities.User;
 
 namespace Concept.Core.Entities.Resource
 {
     public class ResourceEntity : AuditableEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
         public string ResourceType { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string ResourceKey { get; set; } = string.Empty;
+
+        public int ParentResourceId  { get; set; }
 
         /// <summary>
         /// 資源擁有者

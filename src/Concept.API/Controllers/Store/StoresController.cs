@@ -1,4 +1,5 @@
-﻿using Concept.API.Authorizations.ResourceAccess;
+﻿using Concept.API.Authorizations.PermissionAccess;
+using Concept.API.Authorizations.ResourceAccess;
 using Concept.API.Controllers.Store.Requests;
 using Concept.API.Extensions;
 using Concept.Core.Entities.ResourceAuthorization.Enums;
@@ -22,6 +23,7 @@ namespace Concept.API.Controllers.Store
         /// 新增商店
         /// </summary>
         [HttpPost, Authorize]
+        [RequirePermission("Stores.Create")]
         public async Task<IActionResult> AddStoreAsync([FromBody] AddStoreRequest req)
         {
             var result = await _storeService.AddStoreAsync(User.GetUserId(), req.Name);
@@ -41,7 +43,7 @@ namespace Concept.API.Controllers.Store
         /// 取得商店資訊
         /// </summary>
         [HttpGet("{storeId}"), Authorize]
-        [ResourceAccess("Store", "StoreId", ResourcePermissionLevel.VIEWER)]
+        [RequirePermission("Stores.View")]
         public async Task<IActionResult> GetStoreByIdAsync(int storeId)
         {
             var result = await _storeService.GetStoreByIdAsync(storeId);

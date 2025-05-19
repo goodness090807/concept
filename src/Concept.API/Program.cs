@@ -3,17 +3,21 @@ using Concept.API.Extensions;
 using Concept.API.Middlewares;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
+using Concept.Core.Interfaces.Services;
+using Concept.Core.Services.Permission;
 using Concept.Infrastructure;
 using Concept.Infrastructure.Data;
 using Concept.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Shared;
 using Shared.Configs;
 using Shared.Interfaces;
+using Concept.Infrastructure.Extensions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,10 +46,16 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthorizationHandler, ResourceAccessHandler>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, ResourceAccessPolicyProvider>();
+
+// 添加基於權限的授權
+builder.Services.AddPermissionBasedAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -124,6 +134,15 @@ app.MapControllers();
 
 // 映射健康檢查端點 (放在app.UseAuthorization()之後或app.MapControllers()附近)
 app.MapHealthChecks("/health");
+
+// 應用遷移並填充資料庫
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        await SeedExtensions.MigrateAndSeedDatabaseAsync(scope.ServiceProvider);
+    }
+}
 
 
 // 記錄應用程式啟動訊息
