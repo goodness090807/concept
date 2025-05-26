@@ -1,5 +1,4 @@
 using Concept.Core.Common;
-using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.User.Enums;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
@@ -73,27 +72,7 @@ namespace Concept.Core.Services.User
         
         public async Task<Result<UserStoresViewModel>> GetStoresAsync(int userId)
         {
-            if (userId <= 0)
-            {
-                return Result<UserStoresViewModel>.Failure(UserErrorCodes.UserNotFound, "無效的使用者ID");
-            }
-
-            // 會用到的資料庫資源
-            var resourceRepository = _unitOfWork.GetRepository<IResourceRepository>();
-            
-            // 取得使用者的所有商店權限
-            var storePermissions = await resourceRepository.GetUserResourcePermissionsAsync(ResourceTypes.Store, userId);
-            
-            var userStores = storePermissions.Select(sp => 
-                new UserStoreViewModel(
-                    id: int.Parse(sp.ResourceKey),  // ResourceKey 是 StoreId 的字串表示
-                    name: sp.ResourceName,
-                    permissionLevel: sp.PermissionLevel,
-                    isOwner: sp.OwnerId == userId
-                )
-            ).ToList();
-
-            return Result<UserStoresViewModel>.Success(new UserStoresViewModel(userStores));
+            throw new NotImplementedException();
         }
     }
 }

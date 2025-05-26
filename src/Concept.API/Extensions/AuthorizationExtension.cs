@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Concept.API.Extensions
 {
@@ -21,6 +22,19 @@ namespace Concept.API.Extensions
             }
 
             return int.Parse(idClaim.Value);
+        }
+        
+        /// <summary>
+        /// 配置基於權限的授權
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddPermissionBasedAuthorization(this IServiceCollection services)
+        {
+            //services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            //services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+            return services;
         }
     }
 }
