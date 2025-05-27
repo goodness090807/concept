@@ -1,9 +1,9 @@
 using Concept.Core.Common;
-using Concept.Core.Entities.Resource;
 using Concept.Core.Entities.User.Enums;
 using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Core.Interfaces.Services;
+using Concept.Core.Services.Store;
 using Concept.Core.Services.User.ViewModels;
 using Shared.Interfaces;
 using System.Security.Claims;
@@ -70,30 +70,29 @@ namespace Concept.Core.Services.User
             // 提交並回傳(只有一個資料庫操作，所以不需要 transaction和提交)
             return Result<string>.Success(token);
         }
-        
+
         public async Task<Result<UserStoresViewModel>> GetStoresAsync(int userId)
         {
-            if (userId <= 0)
+            // TODO：查詢使用者可看到的商店列表，包括自己建立的和被分享的
+            throw new NotImplementedException();
+        }
+        
+        
+        public async Task<Result<bool>> HasStorePermissionAsync(int userId, int storeId, string permissionName)
+        {
+            // 檢查商店是否存在
+            var storeRepository = _unitOfWork.GetRepository<IStoreRepository>();
+            var store = await storeRepository.GetStoreByIdAsync(storeId);
+            if (store == null)
             {
-                return Result<UserStoresViewModel>.Failure(UserErrorCodes.UserNotFound, "無效的使用者ID");
+                return Result<bool>.Failure(StoreErrorCodes.StoreNotFound, "商店不存在");
             }
 
-            // 會用到的資料庫資源
-            var resourceRepository = _unitOfWork.GetRepository<IResourceRepository>();
-            
-            // 取得使用者的所有商店權限
-            var storePermissions = await resourceRepository.GetUserResourcePermissionsAsync(ResourceTypes.Store, userId);
-            
-            var userStores = storePermissions.Select(sp => 
-                new UserStoreViewModel(
-                    id: int.Parse(sp.ResourceKey),  // ResourceKey 是 StoreId 的字串表示
-                    name: sp.ResourceName,
-                    permissionLevel: sp.PermissionLevel,
-                    isOwner: sp.OwnerId == userId
-                )
-            ).ToList();
+            var userRepository = _unitOfWork.GetRepository<IUserRepository>();
 
-            return Result<UserStoresViewModel>.Success(new UserStoresViewModel(userStores));
+            // 檢查使用者是否有權限
+            var hasPermission = await userRepository.HasStorePermissionAsync(userId, storeId, permissionName);
+            return Result<bool>.Success(hasPermission);
         }
     }
 }

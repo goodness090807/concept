@@ -39,7 +39,7 @@ POST {{API_HostAddress}}/api/stores
 Content-Type: application/json
 Authorization: Bearer {{token}}
 {
-  "Name": "使用者測試商店2"
+  "Name": "使用者測試商店"
 }
 
 ###
@@ -50,13 +50,3 @@ GET {{API_HostAddress}}/api/stores/1
 Authorization: Bearer {{token}}
 
 ###
-
-# 給予商店權限
-
-POST {{API_HostAddress}}/api/stores/1/permissions
-Content-Type: application/json
-Authorization: Bearer {{token}}
-{
-  "UserId": 2,
-  "PermissionLevel": 1
-}

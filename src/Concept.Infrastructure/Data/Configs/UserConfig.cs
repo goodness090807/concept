@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Concept.Infrastructure.Data.Configs
 {
-    public class UserConfig : IEntityTypeConfiguration<UserEntity>
+    public class UserConfig : BaseEntityTypeConfiguration<UserEntity>
     {
-        public void Configure(EntityTypeBuilder<UserEntity> builder)
+        protected override void ConfigureEntity(EntityTypeBuilder<UserEntity> builder)
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.UserName).HasMaxLength(50).IsRequired();
@@ -18,8 +18,6 @@ namespace Concept.Infrastructure.Data.Configs
                    .HasMaxLength(20)
                    .HasDefaultValue(UserStatus.Inactive)
                    .IsRequired();
-            
-            builder.ConfigureTimestampedEntity();
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Concept.Core.Interfaces.Services
         /// </summary>
         Task<Result<string>> LoginAsync(string email, string password);
 
+        Task<Result<bool>> HasStorePermissionAsync(int userId, int storeId, string permissionName);
+
         /// <summary>
         /// 取得使用者可以存取的商店列表
         /// </summary>

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Concept.Infrastructure.Data.Configs
 {
-    public class StoreConfig : IEntityTypeConfiguration<StoreEntity>
+    public class StoreConfig : BaseEntityTypeConfiguration<StoreEntity>
     {
-        public void Configure(EntityTypeBuilder<StoreEntity> builder)
+        protected override void ConfigureEntity(EntityTypeBuilder<StoreEntity> builder)
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
@@ -18,8 +18,6 @@ namespace Concept.Infrastructure.Data.Configs
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-
-            builder.ConfigureTimestampedEntity();
         }
     }
 }
