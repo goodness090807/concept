@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Concept.Core.Entities.Role.Enums
+﻿namespace Concept.Core.Entities.Role.Enums
 {
     public enum Roles
     {
-        Owner = 1,
+        Admin = 1,
+        StoreOwner = 2,
+        StoreManager = 3,
     }
 }

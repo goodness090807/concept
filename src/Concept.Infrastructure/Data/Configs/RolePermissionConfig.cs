@@ -1,4 +1,5 @@
-﻿using Concept.Core.Entities.RolePermission;
+﻿using Concept.Core.Entities.Role.Enums;
+using Concept.Core.Entities.RolePermission;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,6 +20,24 @@ namespace Concept.Infrastructure.Data.Configs
                 .WithMany(x => x.RolePermissions)
                 .HasForeignKey(x => x.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasData(
+                new RolePermissionEntity
+                {
+                    RoleId = (int)Roles.StoreOwner, // StoreOwner
+                    PermissionId = 1 // store:get
+                },
+                new RolePermissionEntity
+                {
+                    RoleId = (int)Roles.StoreOwner, // StoreOwner
+                    PermissionId = 2 // store:grant-role
+                },
+                new RolePermissionEntity
+                {
+                    RoleId = (int)Roles.StoreManager, // StoreManager
+                    PermissionId = 1 // store:get
+                }
+            );
         }
     }
 }

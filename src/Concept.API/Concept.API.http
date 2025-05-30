@@ -4,8 +4,20 @@
 POST {{API_HostAddress}}/api/users/register
 Content-Type: application/json
 {
-  "Username": "測試使用者",
-  "Email": "test@gmail.com",
+  "Username": "商店擁有者",
+  "Email": "StoreOwner@gmail.com",
+  "Password": "aA@12345678",
+  "ConfirmPassword": "aA@12345678"
+}
+
+###
+
+# 註冊第二個使用者
+POST {{API_HostAddress}}/api/users/register
+Content-Type: application/json
+{
+  "Username": "商店管理者",
+  "Email": "StoreManager@gmail.com",
   "Password": "aA@12345678",
   "ConfirmPassword": "aA@12345678"
 }
@@ -17,7 +29,7 @@ Content-Type: application/json
 POST {{API_HostAddress}}/api/users/login
 Content-Type: application/json
 {
-  "Email": "test@gmail.com",
+  "Email": "StoreOwner@gmail.com",
   "Password": "aA@12345678"
 }
 
@@ -25,16 +37,9 @@ Content-Type: application/json
 
 @token = {{login.response.body.*}}
 
-# 取得使用者的商店清單
-
-GET {{API_HostAddress}}/api/users/stores
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
 ###
 
 # 新增商店
-
 POST {{API_HostAddress}}/api/stores
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -44,9 +49,26 @@ Authorization: Bearer {{token}}
 
 ###
 
+# 授予商店管理員權限
+POST {{API_HostAddress}}/api/stores/1/users/2/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+{
+  "Roles": [3]
+}
+
+###
 
 # 取得指定商店的詳細資訊
 GET {{API_HostAddress}}/api/stores/1
+Authorization: Bearer {{token}}
+
+###
+
+# 取得使用者的商店清單
+
+GET {{API_HostAddress}}/api/users/stores
+Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###

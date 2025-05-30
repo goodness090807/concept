@@ -12,6 +12,21 @@ namespace Concept.Infrastructure.Data.Configs
             builder.Property(x => x.Description).IsRequired().HasMaxLength(500);
 
             builder.HasIndex(x => x.Name).IsUnique();
+
+            builder.HasData(
+                new PermissionEntity
+                {
+                    Id = 1,
+                    Name = "store:get",
+                    Description = "取得商店資訊"
+                },
+                new PermissionEntity
+                {
+                    Id = 2,
+                    Name = "store:grant-role",
+                    Description = "授予商店角色"
+                }
+            );
         }
     }
 }

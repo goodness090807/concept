@@ -54,5 +54,23 @@ namespace Concept.API.Controllers.Store
             }
             return Ok(result.Data);
         }
+
+        [StorePermission("store:grant-role")]
+        [HttpPost("{storeId}/users/{userId}/roles"), Authorize]
+        public async Task<IActionResult> GrantUserStoreRoleAsync(int storeId, int userId, [FromBody] GrantStoreRoleRequest req)
+        {
+            var result = await _storeService.GrantStoreRoleAsync(storeId, userId, req.Roles);
+            if (result.IsFailure)
+            {
+                return result.ErrorCode switch
+                {
+                    StoreErrorCodes.StoreNotFound => NotFound("商店不存在"),
+                    StoreErrorCodes.UserNotFound => NotFound("使用者不存在"),
+                    _ => BadRequest("授予商店權限失敗")
+                };
+            }
+
+            return Ok();
+        }
     }
 }

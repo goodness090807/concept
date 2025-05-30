@@ -12,6 +12,27 @@ namespace Concept.Infrastructure.Data.Configs
             builder.Property(x => x.Description).IsRequired().HasMaxLength(500);
 
             builder.HasIndex(x => x.Name).IsUnique();
+
+            builder.HasData(
+                new RoleEntity
+                {
+                    Id = 1,
+                    Name = "Admin",
+                    Description = "系統管理員"
+                },
+                new RoleEntity
+                {
+                    Id = 2,
+                    Name = "StoreOwner",
+                    Description = "商店擁有者"
+                },
+                new RoleEntity
+                {
+                    Id = 3,
+                    Name = "StoreManager",
+                    Description = "商店管理員"
+                }
+            );
         }
     }
 }

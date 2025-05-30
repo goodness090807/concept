@@ -57,6 +57,27 @@ namespace Concept.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task UpsertUserStoreRolesAsync(int userId, int storeId, IEnumerable<Roles> roleIds)
+        {
+            // 先刪除舊的角色
+            var existingRoles = await _context.UserStoreRoles
+                .Where(r => r.UserId == userId && r.StoreId == storeId)
+                .ToListAsync();
+            _context.UserStoreRoles.RemoveRange(existingRoles);
+
+            // 新增新的角色
+            foreach (var roleId in roleIds)
+            {
+                var userStoreRole = new UserStoreRoleEntity
+                {
+                    UserId = userId,
+                    StoreId = storeId,
+                    RoleId = (int)roleId
+                };
+                await _context.UserStoreRoles.AddAsync(userStoreRole);
+            }
+        }
+
         public async Task<bool> HasStorePermissionAsync(int userId, int storeId, string permissionName)
         {
             // 檢查商店角色權限
