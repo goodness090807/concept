@@ -66,6 +66,7 @@ namespace Concept.API.Controllers.Store
                 {
                     StoreErrorCodes.StoreNotFound => NotFound("商店不存在"),
                     StoreErrorCodes.UserNotFound => NotFound("使用者不存在"),
+                    StoreErrorCodes.CannotGrantOwnerPermission => BadRequest("無法授予商店擁有者權限"),
                     _ => BadRequest("授予商店權限失敗")
                 };
             }
