@@ -1,6 +1,5 @@
 using Concept.Core.Common;
 using Concept.Core.Entities.User.Enums;
-using Concept.Core.Interfaces;
 using Concept.Core.Interfaces.Repositories;
 using Concept.Core.Interfaces.Services;
 using Concept.Core.Services.Store;
@@ -12,29 +11,30 @@ namespace Concept.Core.Services.User
 {
     public class UserService : IUserService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserRepository _userRepository;
+        private readonly IStoreRepository _storeRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
 
-        public UserService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, ITokenService tokenService)
+        public UserService(
+            IUserRepository userRepository, IStoreRepository storeRepository,
+            IPasswordHasher passwordHasher, ITokenService tokenService)
         {
-            _unitOfWork = unitOfWork;
+            _userRepository = userRepository;
+            _storeRepository = storeRepository;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
         }
 
         public async Task<Result<int>> RegisterAsync(string email, string username, string password, string confirmPassword)
         {
-            // 會用到的資料庫資源寫在這
-            var userRepository = _unitOfWork.GetRepository<IUserRepository>();
-
             // 檢查區塊
             if (password != confirmPassword)
             {
                 return Result<int>.Failure(UserErrorCodes.PasswordAndConfirmPasswordNotMatch, "密碼不一致");
             }
 
-            if (await userRepository.GetUserByEmailAsync(email) != null)
+            if (await _userRepository.GetUserByEmailAsync(email) != null)
             {
                 return Result<int>.Failure(UserErrorCodes.EmailAlreadyExists, "Email已存在");
             }
@@ -43,7 +43,7 @@ namespace Concept.Core.Services.User
             var hashedPassword = _passwordHasher.HashPassword(password);
 
             // 資源寫入區塊
-            var userId = await userRepository.AddUserAsync(username, email, hashedPassword, UserStatus.Inactive);
+            var userId = await _userRepository.AddUserAsync(username, email, hashedPassword, UserStatus.Inactive);
 
             // 提交並回傳(只有一個資料庫操作，所以不需要 transaction和提交)
             return Result<int>.Success(userId);
@@ -51,10 +51,8 @@ namespace Concept.Core.Services.User
 
         public async Task<Result<string>> LoginAsync(string email, string password)
         {
-            // 會用到的資料庫資源寫在這
-            var userRepository = _unitOfWork.GetRepository<IUserRepository>();
             // 檢查區塊
-            var user = await userRepository.GetUserByEmailAsync(email);
+            var user = await _userRepository.GetUserByEmailAsync(email);
             if (user == null)
             {
                 return Result<string>.Failure(UserErrorCodes.UserNotFound, "使用者不存在");
@@ -80,18 +78,14 @@ namespace Concept.Core.Services.User
         
         public async Task<Result<bool>> HasStorePermissionAsync(int userId, int storeId, string permissionName)
         {
-            // 檢查商店是否存在
-            var storeRepository = _unitOfWork.GetRepository<IStoreRepository>();
-            var store = await storeRepository.GetStoreByIdAsync(storeId);
+            var store = await _storeRepository.GetStoreByIdAsync(storeId);
             if (store == null)
             {
                 return Result<bool>.Failure(StoreErrorCodes.StoreNotFound, "商店不存在");
             }
 
-            var userRepository = _unitOfWork.GetRepository<IUserRepository>();
-
             // 檢查使用者是否有權限
-            var hasPermission = await userRepository.HasStorePermissionAsync(userId, storeId, permissionName);
+            var hasPermission = await _userRepository.HasStorePermissionAsync(userId, storeId, permissionName);
             return Result<bool>.Success(hasPermission);
         }
     }
